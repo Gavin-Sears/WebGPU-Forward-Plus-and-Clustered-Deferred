@@ -7,7 +7,7 @@ export var canvas: HTMLCanvasElement;
 export var canvasFormat: GPUTextureFormat;
 export var context: GPUCanvasContext;
 export var device: GPUDevice;
-export var canvasTextureView: GPUTextureView;
+//export var canvasTextureView: GPUTextureView;
 
 export var aspectRatio: number;
 export const fovYDegrees = 45;

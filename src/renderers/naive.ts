@@ -81,7 +81,7 @@ export class NaiveRenderer extends renderer.Renderer {
                 module: renderer.device.createShaderModule({
                     label: "naive frag shader",
                     code: shaders.naiveFragSrc,
-                }),
+                }), 
                 targets: [
                     {
                         format: renderer.canvasFormat,
@@ -115,10 +115,10 @@ export class NaiveRenderer extends renderer.Renderer {
         renderPass.setPipeline(this.pipeline);
 
         // TODO-1.2: bind `this.sceneUniformsBindGroup` to index `shaders.constants.bindGroup_scene`
+        renderPass.setBindGroup(shaders.constants.bindGroup_scene, this.sceneUniformsBindGroup);
 
         this.scene.iterate(node => { 
             renderPass.setBindGroup(shaders.constants.bindGroup_model, node.modelBindGroup);
-            renderPass.setBindGroup(shaders.constants.bindGroup_scene, this.sceneUniformsBindGroup);
         }, material => {
             renderPass.setBindGroup(shaders.constants.bindGroup_material, material.materialBindGroup);
         }, primitive => {
