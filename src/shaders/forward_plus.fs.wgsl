@@ -35,16 +35,7 @@ fn main(in : FragmentInput) -> @location(0) vec4f {
         discard;
     }
 
-    let clipPos = camera.viewProjMat * vec4f(in.pos, 1.0);
-    let ndc = clipPos.xy / clipPos.w;
-    let x = u32(clamp((ndc.x * 0.5 + 0.5) * f32(${clusterCountX}), 0.0, f32(${clusterCountX} - 1)));
-    let y = u32(clamp((ndc.y * 0.5 + 0.5) * f32(${clusterCountY}), 0.0, f32(${clusterCountY} - 1)));
-
-    let viewDepth = -(camera.viewMat * vec4f(in.pos, 1.0)).z;
-    let zSlice = log(viewDepth / camera.nearPlane) / log(camera.farPlane / camera.nearPlane) * f32(${clusterCountZ});
-    let z = u32(clamp(zSlice, 0.0, f32(${clusterCountZ} - 1)));
-
-    let clusterIdx = x + y * ${clusterCountX}u + z * ${clusterCountX}u * ${clusterCountY}u;
+    let clusterIdx = clusterIndexFromWorldPos(in.pos, camera.viewProjMat, camera.viewMat, camera.nearPlane, camera.farPlane);
     let cluster = &clusterSet.clusters[clusterIdx];
 
     let nor = normalize(in.nor);

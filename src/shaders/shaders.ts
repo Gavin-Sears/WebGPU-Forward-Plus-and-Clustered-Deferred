@@ -36,6 +36,8 @@ export const constants = {
     maxLightsPerCluster: 256,
     clusteringWorkgroupSize: 64,
 
+    bindGroup_gbuffer: 1,
+
     lightRadius: 2
 };
 
