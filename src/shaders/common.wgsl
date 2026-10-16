@@ -10,11 +10,16 @@ struct LightSet {
     lights: array<Light>
 }
 
+// 1028 bytes with 256 maxLightsPerCluster
+struct Cluster {
+    numLights: u32,
+    lightIndices: array<u32, ${maxLightsPerCluster}>
+}
+
 // TODO-2: you may want to create a ClusterSet struct similar to LightSet
-/*struct ClusterSet {
-    numClusters: u32,
+struct ClusterSet {
     clusters: array<Cluster>
-}*/
+}
 
 // size: 208 (would be 200 if not for padding)
 struct CameraUniforms {
