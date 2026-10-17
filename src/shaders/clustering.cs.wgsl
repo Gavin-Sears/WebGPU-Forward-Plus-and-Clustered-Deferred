@@ -85,8 +85,5 @@ fn main(@builtin(global_invocation_id) globalIdx: vec3u) {
             }
         }
     }
-    for (var i = count; i < ${maxLightsPerCluster}u; i++) {
-        (*cluster).lightIndices[i] = 0u; 
-    }
     (*cluster).numLights = count;
 }

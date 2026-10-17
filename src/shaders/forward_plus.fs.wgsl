@@ -51,8 +51,7 @@ fn main(in : FragmentInput) -> @location(0) vec4f {
     // many lights in a cluster, since it will have strange dark edges.
     if ((*cluster).numLights >= ${maxLightsPerCluster}u) {
         return vec4f(1, 0, 0, 1);
-    }
-    */
+    }*/
 
     return vec4(diffuseColor.rgb * totalLightContrib, 1);
 }

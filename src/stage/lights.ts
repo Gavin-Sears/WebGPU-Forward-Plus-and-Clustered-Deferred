@@ -1,5 +1,5 @@
 import { vec3 } from "wgpu-matrix";
-import { device } from "../renderer";
+import { device, gpuTimer } from "../renderer";
 
 import * as shaders from '../shaders/shaders';
 import { Camera } from "./camera";
@@ -184,7 +184,10 @@ export class Lights {
         const c = shaders.constants;
         const numClusters = c.clusterCountX * c.clusterCountY * c.clusterCountZ;
 
-        const computePass = encoder.beginComputePass({ label: "light clustering pass" });
+        const computePass = encoder.beginComputePass({
+            label: "light clustering pass",
+            timestampWrites: gpuTimer?.passWrites("clustering")
+        });
         computePass.setPipeline(this.clusteringComputePipeline);
         computePass.setBindGroup(shaders.constants.bindGroup_scene, this.clusteringComputeBindGroup);
         computePass.dispatchWorkgroups(Math.ceil(numClusters / c.clusteringWorkgroupSize));

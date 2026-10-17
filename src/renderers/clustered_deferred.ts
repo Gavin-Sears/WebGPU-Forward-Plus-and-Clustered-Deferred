@@ -207,6 +207,7 @@ export class ClusteredDeferredRenderer extends renderer.Renderer {
         encoder.pushDebugGroup("g-buffer");
         const gBufferPass = encoder.beginRenderPass({
             label: "g-buffer pass",
+            timestampWrites: renderer.gpuTimer?.passWrites("g-buffer"),
             colorAttachments: [
                 { view: this.albedoTextureView, clearValue: [0, 0, 0, 0], loadOp: "clear", storeOp: "store" },
                 { view: this.normalTextureView, clearValue: [0, 0, 0, 0], loadOp: "clear", storeOp: "store" }
@@ -235,6 +236,7 @@ export class ClusteredDeferredRenderer extends renderer.Renderer {
         encoder.pushDebugGroup("deferred shading");
         const shadingPass = encoder.beginRenderPass({
             label: "deferred fullscreen pass",
+            timestampWrites: renderer.gpuTimer?.passWrites("fullscreen shading"),
             colorAttachments: [
                 { view: canvasTextureView, clearValue: [0, 0, 0, 0], loadOp: "clear", storeOp: "store" }
             ]
@@ -246,6 +248,8 @@ export class ClusteredDeferredRenderer extends renderer.Renderer {
         shadingPass.end();
         encoder.popDebugGroup();
 
+        renderer.gpuTimer?.resolve(encoder);
         renderer.device.queue.submit([encoder.finish()]);
+        renderer.gpuTimer?.afterSubmit();
     }
 }

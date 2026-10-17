@@ -109,9 +109,10 @@ export class ForwardPlusRenderer extends renderer.Renderer {
         }
 
         {
-            encoder.pushDebugGroup('rednering (forward+)');
+            encoder.pushDebugGroup('rendering (forward+)');
             const renderPass = encoder.beginRenderPass({
                 label: "forward+ render pass",
+                timestampWrites: renderer.gpuTimer?.passWrites("shading"),
                 colorAttachments: [
                     {
                         view: canvasTextureView,
@@ -142,6 +143,8 @@ export class ForwardPlusRenderer extends renderer.Renderer {
             encoder.popDebugGroup();
         }
 
+        renderer.gpuTimer?.resolve(encoder);
         renderer.device.queue.submit([encoder.finish()]);
+        renderer.gpuTimer?.afterSubmit();
     }
 }

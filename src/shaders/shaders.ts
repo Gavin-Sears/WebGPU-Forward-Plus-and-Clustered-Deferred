@@ -33,13 +33,20 @@ export const constants = {
     clusterCountX: 16,
     clusterCountY: 9,
     clusterCountZ: 24,
-    maxLightsPerCluster: 256,
+    maxLightsPerCluster: 1024,
     clusteringWorkgroupSize: 64,
 
     bindGroup_gbuffer: 1,
 
     lightRadius: 2
 };
+
+const clusterOverride = new URLSearchParams(window.location.search).get('clusters')?.match(/^(\d+)x(\d+)x(\d+)$/);
+if (clusterOverride) {
+    constants.clusterCountX = Number(clusterOverride[1]);
+    constants.clusterCountY = Number(clusterOverride[2]);
+    constants.clusterCountZ = Number(clusterOverride[3]);
+}
 
 // =================================
 

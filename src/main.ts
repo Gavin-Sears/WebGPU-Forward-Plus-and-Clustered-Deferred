@@ -1,7 +1,8 @@
 import Stats from 'stats.js';
 import { GUI } from 'dat.gui';
 
-import { initWebGPU, Renderer } from './renderer';
+import { initWebGPU, Renderer, adapterInfo, canvas, frameTimer, gpuTimer } from './renderer';
+import { constants } from './shaders/shaders';
 import { NaiveRenderer } from './renderers/naive';
 import { ForwardPlusRenderer } from './renderers/forward_plus';
 import { ClusteredDeferredRenderer } from './renderers/clustered_deferred';
@@ -54,3 +55,43 @@ let renderModeController = gui.add({ mode: renderModes.naive }, 'mode', renderMo
 renderModeController.onChange(setRenderer);
 
 setRenderer(renderModeController.getValue());
+
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has('bench')) {
+    runBenchmark(urlParams);
+}
+
+async function runBenchmark(params: URLSearchParams) {
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    const mode = params.get('mode') ?? renderModes.naive;
+    const warmupMs = Number(params.get('warmup') ?? 1500);
+    const measureMs = Number(params.get('measure') ?? 4000);
+
+    lights.numLights = Number(params.get('lights') ?? lights.numLights);
+    lights.updateLightSetUniformNumLights();
+    gui.updateDisplay();
+    // triggers onChange, which calls setRenderer
+    renderModeController.setValue(mode);
+
+    await sleep(warmupMs);
+    frameTimer.reset();
+    gpuTimer?.reset();
+    await sleep(measureMs);
+    const frame = frameTimer.stats();
+
+    renderer?.stop();
+    await sleep(1000);
+
+    const result = {
+        mode: mode,
+        numLights: lights.numLights,
+        clusters: [constants.clusterCountX, constants.clusterCountY, constants.clusterCountZ],
+        maxLightsPerCluster: constants.maxLightsPerCluster,
+        canvas: [canvas.width, canvas.height],
+        adapter: { vendor: adapterInfo.vendor, architecture: adapterInfo.architecture, description: adapterInfo.description },
+        frame: frame,
+        gpu: gpuTimer?.stats() ?? {}
+    };
+    (window as any).benchResult = result;
+    console.log(JSON.stringify(result));
+}

@@ -97,6 +97,7 @@ export class NaiveRenderer extends renderer.Renderer {
 
         const renderPass = encoder.beginRenderPass({
             label: "naive render pass",
+            timestampWrites: renderer.gpuTimer?.passWrites("shading"),
             colorAttachments: [
                 {
                     view: canvasTextureView,
@@ -129,6 +130,8 @@ export class NaiveRenderer extends renderer.Renderer {
 
         renderPass.end();
 
+        renderer.gpuTimer?.resolve(encoder);
         renderer.device.queue.submit([encoder.finish()]);
+        renderer.gpuTimer?.afterSubmit();
     }
 }
