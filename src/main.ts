@@ -51,7 +51,10 @@ function setRenderer(mode: string) {
 }
 
 const renderModes = { naive: 'naive', forwardPlus: 'forward+', clusteredDeferred: 'clustered deferred' };
-let renderModeController = gui.add({ mode: renderModes.naive }, 'mode', renderModes);
+// On mobile I want clustered deferred to be the default, since
+// naive is not real time.
+const isMobile = window.matchMedia('(pointer: coarse)').matches;
+let renderModeController = gui.add({ mode: isMobile ? renderModes.clusteredDeferred : renderModes.naive }, 'mode', renderModes);
 renderModeController.onChange(setRenderer);
 
 setRenderer(renderModeController.getValue());

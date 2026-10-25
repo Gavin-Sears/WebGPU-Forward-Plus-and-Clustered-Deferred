@@ -46,6 +46,10 @@ export class Camera {
     pitch: number = 0;
     moveSpeed: number = 0.004;
     sensitivity: number = 0.15;
+    touchSensitivity: number = 0.25; // degrees per pixel dragged
+    touchMoveSpeed: number = 0.02; // world units per pixel dragged
+
+    private lastTouch: { x: number, y: number, count: number } | undefined;
 
     static readonly nearPlane = 0.1;
     static readonly farPlane = 1000;
@@ -79,6 +83,11 @@ export class Camera {
         canvas.addEventListener('mousedown', () => canvas.requestPointerLock());
         canvas.addEventListener('mouseup', () => document.exitPointerLock());
         canvas.addEventListener('mousemove', (event) => this.onMouseMove(event));
+
+        // touch controls
+        for (const type of ['touchstart', 'touchmove', 'touchend', 'touchcancel']) {
+            canvas.addEventListener(type, (event) => this.onTouch(event as TouchEvent), { passive: false });
+        }
     }
 
     private onKeyEvent(event: KeyboardEvent, down: boolean) {
@@ -113,6 +122,42 @@ export class Camera {
         if (document.pointerLockElement === canvas) {
             this.rotateCamera(event.movementX * this.sensitivity, event.movementY * this.sensitivity);
         }
+    }
+
+    private onTouch(event: TouchEvent) {
+        event.preventDefault(); // Stops browser from emulating mouse events (and emulating pointer lock)
+
+        const touches = event.touches;
+        if (touches.length === 0) {
+            this.lastTouch = undefined;
+            return;
+        }
+
+        // track the midpoint of all fingers
+        let x = 0;
+        let y = 0;
+        for (let i = 0; i < touches.length; ++i) {
+            x += touches[i].clientX;
+            y += touches[i].clientY;
+        }
+        x /= touches.length;
+        y /= touches.length;
+
+        // only apply movement while finger count stays the same
+        if (event.type === 'touchmove' && this.lastTouch?.count === touches.length) {
+            const dx = x - this.lastTouch.x;
+            const dy = y - this.lastTouch.y;
+            if (touches.length === 1) {
+                this.rotateCamera(dx * this.touchSensitivity, dy * this.touchSensitivity);
+            } else {
+                // drag up to move forward, drag sideways to strafe
+                const forward = vec3.scale(this.cameraFront, -dy * this.touchMoveSpeed);
+                const right = vec3.scale(this.cameraRight, dx * this.touchMoveSpeed);
+                this.cameraPos = vec3.add(this.cameraPos, vec3.add(forward, right));
+            }
+        }
+
+        this.lastTouch = { x: x, y: y, count: touches.length };
     }
 
     private processInput(deltaTime: number) {
